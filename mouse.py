@@ -33,7 +33,7 @@ class Mouse:
         y = self.y / 100 + 0.5
 
         if self.hole < 180:
-            drawCircle(window, dirt, x, y, math.sin(self.hole / 180.0 * math.pi) / 2)
+            drawCircle(window, dirt, x, y, math.sin(toRad(self.hole)) / 2)
         if self.hole < 90:
             return
     
@@ -71,8 +71,8 @@ class Mouse:
             self.hole += 2
             return
         
-        self.x += math.cos(self.dir / 180.0 * math.pi) * self.speed
-        self.y += math.sin(self.dir / 180.0 * math.pi) * self.speed
+        self.x += math.cos(toRad(self.dir)) * self.speed
+        self.y += math.sin(toRad(self.dir)) * self.speed
         if self.rotQueue == 0:
             self.rotQueue = random.randint(-15, 15)
         if self.rotQueue < 0:
@@ -103,8 +103,8 @@ class Mouse:
 
 
         if shouldChange:
-            self.x -= math.cos(self.dir / 180.0 * math.pi) * self.speed
-            self.y -= math.sin(self.dir / 180.0 * math.pi) * self.speed
+            self.x -= math.cos(toRad(self.dir)) * self.speed
+            self.y -= math.sin(toRad(self.dir)) * self.speed
             if self.searchDir == 0:
                 self.searchDir = random.choice((-1, 1))
             else:

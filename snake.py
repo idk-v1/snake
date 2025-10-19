@@ -21,23 +21,21 @@ eyeMain = pygame.Color(0, 0, 0)
 bloodRed1 = pygame.Color(159, 0, 0)
 
 class Segment:
-    def __init__(self, x, y, dx, dy):
+    def __init__(self, x, y, dir):
         self.x = x
         self.y = y
-        self.dx = dx
-        self.dy = dy
+        self.dir = dir
         self.canMove = False
         self.bit = 0
 
 class Snake:
     def __init__(self, x, y, length):
-        self.nextDirX = 1
-        self.nextDirY = 0
+        self.nextDir = 0
         self.segs = []
         for i in range(length):
-            posX = x * 100 - self.nextDirX * i * 100
-            posY = y * 100 - self.nextDirY * i * 100
-            self.segs.append(Segment(posX, posY, self.nextDirX, self.nextDirY))
+            posX = x * 100 - math.cos(toRad(self.nextDir)) * i * 100
+            posY = y * 100 - math.sin(toRad(self.nextDir)) * i * 100
+            self.segs.append(Segment(posX, posY, self.nextDir))
             self.segs[-1].canMove = True
         self.shouldAdd = False
         self.speed = 10
@@ -100,44 +98,34 @@ class Snake:
         x = self.segs[0].x / 100 + 0.5
         y = self.segs[0].y / 100 + 0.5
 
-        rot = 0
-        if self.segs[0].dx == 0 and self.segs[0].dy == -1:
-            rot = 270
-        if self.segs[0].dx == 0 and self.segs[0].dy == 1:
-            rot = 90
-        if self.segs[0].dx == 1 and self.segs[0].dy == 0:
-            rot = 0
-        if self.segs[0].dx == -1 and self.segs[0].dy == 0:
-            rot = 180
-
         # tongue
-        tongue = rotPoint(x, y, max(math.sin(self.tongueCycle / 180.0 * math.pi), 0.0) / 2, rot)
+        tongue = rotPoint(x, y, max(math.sin(toRad(self.tongueCycle)), 0.0) / 2, self.segs[0].dir)
         drawLinePt(window, tongueRed, x, y, tongue[0], tongue[1], 1 / 10)
-        drawLineRot(window, tongueRed, tongue[0], tongue[1], 1 / 6, rot + 45, 1 / 15)
-        drawLineRot(window, tongueRed, tongue[0], tongue[1], 1 / 6, rot - 45, 1 / 15)
+        drawLineRot(window, tongueRed, tongue[0], tongue[1], 1 / 6, self.segs[0].dir + 45, 1 / 15)
+        drawLineRot(window, tongueRed, tongue[0], tongue[1], 1 / 6, self.segs[0].dir - 45, 1 / 15)
 
         # head
         drawCircle(window, snakeBlue2, x, y, rad)
 
         # eyes
         rad = self.rad / 2
-        eye = rotPoint(x, y, 1 / 6, rot + 45)
+        eye = rotPoint(x, y, 1 / 6, self.segs[0].dir + 45)
         drawCircle(window, eyeWhite, eye[0], eye[1], rad / 4)
         if self.dead:
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, rot + 45, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, rot + 135, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, rot + 225, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, rot + 315, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 45, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 135, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 225, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 315, 0.05)
         else:
             drawCircle(window, eyeMain, eye[0], eye[1], rad / 4.5)
 
-        eye = rotPoint(x, y, 1 / 6, rot - 45)
+        eye = rotPoint(x, y, 1 / 6, self.segs[0].dir - 45)
         drawCircle(window, eyeWhite, eye[0], eye[1], rad / 4)
         if self.dead:
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, rot + 45, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, rot + 135, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, rot + 225, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, rot + 315, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 45, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 135, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 225, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 315, 0.05)
         else:
             drawCircle(window, eyeMain, eye[0], eye[1], rad / 4.5)        
         
@@ -153,10 +141,9 @@ class Snake:
                 return True
         return False
 
-    def changeDir(self, x, y):
-        if not (self.segs[0].dx == x or self.segs[0].dy == y):
-            self.nextDirX = x
-            self.nextDirY = y
+    def changeDir(self, dir):
+        if self.segs[0].dir % 180 != dir % 180:
+            self.nextDir = dir
 
     # returns 1 if ate apple, -1 if ate tail, 0 other
     def update(self, mouse, gridSize, bloodstain):
@@ -169,8 +156,8 @@ class Snake:
         
         for seg in self.segs:
             if seg.canMove:
-                seg.x += seg.dx * self.speed
-                seg.y += seg.dy * self.speed
+                seg.x += int(math.cos(toRad(seg.dir))) * self.speed
+                seg.y += int(math.sin(toRad(seg.dir))) * self.speed
         
         # aligned to grid
         if self.segs[0].x % 100 == 0:
@@ -185,20 +172,17 @@ class Snake:
                 self.segs[-1].canMove = True
                 
                 if self.shouldAdd: # add if needed
-                    dx = self.segs[-1].dx
-                    dy = self.segs[-1].dy
+                    dir = self.segs[-1].dir
                     x = self.segs[-1].x
                     y = self.segs[-1].y
-                    self.segs.append(Segment(x, y, dx, dy))
+                    self.segs.append(Segment(x, y, dir))
                     self.shouldAdd = False
 
                 # update segments to last segment direction
                 for i in (range(len(self.segs) - 1, 0, -1)):
-                    self.segs[i].dx = self.segs[i - 1].dx
-                    self.segs[i].dy = self.segs[i - 1].dy
+                    self.segs[i].dir = self.segs[i - 1].dir
 
-                self.segs[0].dx = self.nextDirX
-                self.segs[0].dy = self.nextDirY
+                self.segs[0].dir = self.nextDir
 
                 # spread bite
                 for i in (range(len(self.segs) - 1, 0, -1)):

@@ -151,13 +151,13 @@ while True:
                 last = time.time() * 1000
             
     if key == pygame.K_LEFT or key == pygame.K_a:
-        snake.changeDir(-1, 0)
+        snake.changeDir(180)
     if key == pygame.K_RIGHT or key == pygame.K_d:
-        snake.changeDir(1, 0)
+        snake.changeDir(0)
     if key == pygame.K_UP or key == pygame.K_w:
-        snake.changeDir(0, -1)
+        snake.changeDir(270)
     if key == pygame.K_DOWN or key == pygame.K_s:
-        snake.changeDir(0, 1)
+        snake.changeDir(90)
 
     pygame.display.update()
 

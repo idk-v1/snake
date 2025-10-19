@@ -6,10 +6,12 @@ import math
 
 scale = 60
 
+def toRad(deg):
+    return deg / 180.0 * math.pi
 
 def rotPoint(cx, cy, length, deg):
-    x = math.cos(deg / 180.0 * math.pi) * length + cx
-    y = math.sin(deg / 180.0 * math.pi) * length + cy
+    x = math.cos(toRad(deg)) * length + cx
+    y = math.sin(toRad(deg)) * length + cy
     return (x, y)
 
 
