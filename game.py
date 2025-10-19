@@ -7,6 +7,7 @@ import pygame
 import random
 import time
 import math
+import os.path
 
 from snake import *
 from mouse import *
@@ -31,7 +32,7 @@ textColor = pygame.Color(255, 255, 255)
 # major game change (eg. classic snake to snake with mice)
 # minor game change (eg. adding mice appearing from holes)
 # unnoticable/bugfix (eg. cleaning up)
-version = "2.8.2"
+version = "2.9.0"
 
 
 pygame.init()
@@ -57,6 +58,21 @@ inGame = False
 hasPlayed = False
 
 ticksPerSec = 30
+
+score = 0
+highscore = 0
+if os.path.exists("highscore.txt"):
+    if os.path.isfile("highscore.txt"):
+        # read file
+        f = open("highscore.txt", "r")
+        highscore = int(f.read())
+        f.close()
+else:
+    #make zeroed file
+    f = open("highscore.txt", "w")
+    f.write("0")
+    f.close()
+    
 
 while True:
 
@@ -91,6 +107,7 @@ while True:
             
             ret = snake.update(mouse, gridSize, bloodstain)
             if ret == 1: # snake ate mouse
+                score += 1
                 bloodstain.add(mouse.x, mouse.y, 2, 4, 0, 50, 3, 6)
 
                 newMouseX = random.randrange(0, gridSize)
@@ -102,6 +119,11 @@ while True:
 
             elif ret == -1: # snake dead
                 inGame = False
+                if score > highscore:
+                    f = open("highscore.txt", "w")
+                    f.write(str(score))
+                    f.close()
+                    highscore = score
                 
         last = now
 
@@ -117,7 +139,7 @@ while True:
         else:
             drawRect(window, scoreBarMenuColor, 0, gridSize, gridSize, scoreBoxH, -1, -1)
 
-        drawText(window, "Score: " + str(snake.length() - initSnakeLen), textColor, smallFont, 1 / 4, gridSize + scoreBoxH / 2, -1, 0)
+        drawText(window, "Score: " + str(score) + " | Highscore: " + str(highscore), textColor, smallFont, 1 / 4, gridSize + scoreBoxH / 2, -1, 0)
 
 
     if not inGame and hasPlayed: # game over
@@ -149,6 +171,7 @@ while True:
                 key = 0
                 dt = 0
                 last = time.time() * 1000
+                score = 0
             
     if key == pygame.K_LEFT or key == pygame.K_a:
         snake.changeDir(180)
