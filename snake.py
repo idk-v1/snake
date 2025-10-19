@@ -42,6 +42,7 @@ class Snake:
         self.rad = 0.8
         self.dead = 0
         self.tongueCycle = 0
+        self.rotAnim = self.nextDir
 
 
     def draw(self, window):
@@ -99,33 +100,33 @@ class Snake:
         y = self.segs[0].y / 100 + 0.5
 
         # tongue
-        tongue = rotPoint(x, y, max(math.sin(toRad(self.tongueCycle)), 0.0) / 2, self.segs[0].dir)
+        tongue = rotPoint(x, y, max(math.sin(toRad(self.tongueCycle)), 0.0) / 2, self.rotAnim)
         drawLinePt(window, tongueRed, x, y, tongue[0], tongue[1], 1 / 10)
-        drawLineRot(window, tongueRed, tongue[0], tongue[1], 1 / 6, self.segs[0].dir + 45, 1 / 15)
-        drawLineRot(window, tongueRed, tongue[0], tongue[1], 1 / 6, self.segs[0].dir - 45, 1 / 15)
+        drawLineRot(window, tongueRed, tongue[0], tongue[1], 1 / 6, self.rotAnim + 45, 1 / 15)
+        drawLineRot(window, tongueRed, tongue[0], tongue[1], 1 / 6, self.rotAnim - 45, 1 / 15)
 
         # head
         drawCircle(window, snakeBlue2, x, y, rad)
 
         # eyes
         rad = self.rad / 2
-        eye = rotPoint(x, y, 1 / 6, self.segs[0].dir + 45)
+        eye = rotPoint(x, y, 1 / 6, self.rotAnim + 45)
         drawCircle(window, eyeWhite, eye[0], eye[1], rad / 4)
         if self.dead:
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 45, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 135, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 225, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 315, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.rotAnim + 45, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.rotAnim + 135, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.rotAnim + 225, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.rotAnim + 315, 0.05)
         else:
             drawCircle(window, eyeMain, eye[0], eye[1], rad / 4.5)
 
-        eye = rotPoint(x, y, 1 / 6, self.segs[0].dir - 45)
+        eye = rotPoint(x, y, 1 / 6, self.rotAnim - 45)
         drawCircle(window, eyeWhite, eye[0], eye[1], rad / 4)
         if self.dead:
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 45, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 135, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 225, 0.05)
-            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.segs[0].dir + 315, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.rotAnim + 45, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.rotAnim + 135, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.rotAnim + 225, 0.05)
+            drawLineRot(window, eyeMain, eye[0], eye[1], rad / 5, self.rotAnim + 315, 0.05)
         else:
             drawCircle(window, eyeMain, eye[0], eye[1], rad / 4.5)        
         
@@ -153,6 +154,19 @@ class Snake:
             return -1
 
         self.tongueCycle += 5
+
+        rotSpeed = 10
+        if self.rotAnim != self.segs[0].dir:
+            if self.segs[0].dir == 0 and self.rotAnim >= 270:
+                self.rotAnim = (self.rotAnim + rotSpeed) % 360
+            elif self.segs[0].dir == 270 and self.rotAnim <= 0:
+                self.rotAnim = (self.rotAnim - rotSpeed) % 360
+            else:
+                if self.rotAnim < self.segs[0].dir:
+                    self.rotAnim += rotSpeed
+                else:
+                    self.rotAnim -= rotSpeed
+                
         
         for seg in self.segs:
             if seg.canMove:
