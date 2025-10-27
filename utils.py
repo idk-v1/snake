@@ -15,11 +15,17 @@ def rotPoint(cx, cy, length, deg):
     return (x, y)
 
 
-def drawText(window, string, color, font, x, y, ax, ay):
+def drawText(window, string, color, font, x, y, ax, ay, bg = 0):
     textSize = font.size(string)
     text = font.render(string, True, color)
     tx = x * scale - textSize[0] / 2 - ax * textSize[0] / 2
     ty = y * scale - textSize[1] / 2 - ay * textSize[1] / 2
+
+    s = pygame.Surface((textSize[0] + scale / 4, textSize[1] + scale / 4))
+    s.set_alpha(bg)
+    s.fill(pygame.Color(0, 0, 0))
+    window.blit(s, (tx - scale / 8, ty - scale / 8))
+
     window.blit(text, (tx, ty))
 
 def drawCircle(window, color, x, y, rad):

@@ -1,7 +1,3 @@
-# BUGS:
-# - Blood from bitten snake only spawns on head and tail
-
-
 import sys
 import pygame
 import random
@@ -32,7 +28,7 @@ textColor = pygame.Color(255, 255, 255)
 # major game change (eg. classic snake to snake with mice)
 # minor game change (eg. adding mice appearing from holes)
 # unnoticable/bugfix (eg. cleaning up)
-version = "2.9.0"
+version = "2.10.0"
 
 
 pygame.init()
@@ -40,7 +36,7 @@ font = pygame.font.SysFont(None, scale)
 smallFont = pygame.font.SysFont(None, scale // 2)
 
 window = pygame.display.set_mode((gridSize * scale, (gridSize + scoreBoxH) * scale))
-pygame.display.set_caption("Snake")
+pygame.display.set_caption("Snake | v" + version)
 
 initSnakeLen = 3
 snake = Snake(gridSize / 2, gridSize / 2, initSnakeLen)
@@ -58,6 +54,8 @@ inGame = False
 hasPlayed = False
 
 ticksPerSec = 30
+speed = 30
+speedInc = 0
 
 score = 0
 highscore = 0
@@ -110,6 +108,8 @@ while True:
                 score += 1
                 bloodstain.add(mouse.x, mouse.y, 2, 4, 0, 50, 3, 6)
 
+                ticksPerSec += speedInc
+
                 newMouseX = random.randrange(0, gridSize)
                 newMouseY = random.randrange(0, gridSize)
                 while snake.isInSquare(newMouseX, newMouseY):
@@ -139,21 +139,29 @@ while True:
         else:
             drawRect(window, scoreBarMenuColor, 0, gridSize, gridSize, scoreBoxH, -1, -1)
 
-        drawText(window, "Score: " + str(score) + " | Highscore: " + str(highscore), textColor, smallFont, 1 / 4, gridSize + scoreBoxH / 2, -1, 0)
-
+        if ticksPerSec - speed:
+            drawText(window, "Score: " + str(score) + " | Highscore: " + str(highscore) + " | Speed: " + str(speed) + "+" + str(ticksPerSec - speed), textColor, smallFont, 1 / 4, gridSize + scoreBoxH / 2, -1, 0)
+        else:
+            drawText(window, "Score: " + str(score) + " | Highscore: " + str(highscore) + " | Speed: " + str(speed), textColor, smallFont, 1 / 4, gridSize + scoreBoxH / 2, -1, 0)
 
     if not inGame and hasPlayed: # game over
         drawText(window, "Game Over!", textColor, font, gridSize / 2, gridSize / 2, 0, 0)
+        drawText(window, "[Enter]: Play Again", textColor, smallFont, gridSize / 2, gridSize * 0.6, 0, 0, 127)
+        drawText(window, "[Esc] Go to Menu", textColor, smallFont, gridSize / 2, gridSize * 0.7, 0, 0, 127)
         
-    if not inGame: # game over / start
-        drawText(window, "Press Enter to Play", textColor, smallFont, gridSize / 2, gridSize * 0.6, 0, 0)
-
     if not inGame and not hasPlayed:
         pygame.draw.rect(window, scoreBarMenuColor, pygame.Rect(0, gridSize * scale, gridSize * scale, scoreBoxH))
 
         drawText(window, "SNAKE", textColor, font, gridSize / 2, gridSize / 2, 0, 0)
-        
-        drawText(window, "v" + version, textColor, smallFont, 1 / 4, gridSize + scoreBoxH / 2, -1, 0)
+        drawText(window, "[Enter]: Play", textColor, smallFont, gridSize / 2, gridSize * 0.6, 0, 0, 127)
+
+        drawText(window, "[L/R]: Speed", textColor, smallFont, gridSize / 2, gridSize * 0.7, 0, 0, 127 * 0)
+        drawText(window, "< " + str(speed) + " >", textColor, smallFont, gridSize / 2, gridSize * 0.75, 0, 0, 127)
+
+        drawText(window, "[U/D]: Speed Inc", textColor, smallFont, gridSize / 2, gridSize * 0.8, 0, 0, 127 * 0)
+        drawText(window, "< " + str(speedInc) + " >", textColor, smallFont, gridSize / 2, gridSize * 0.85, 0, 0, 127)
+
+        drawText(window, "Highscore: " + str(highscore), textColor, smallFont, 1 / 4, gridSize + scoreBoxH / 2, -1, 0)
 
 
     for event in pygame.event.get():
@@ -163,6 +171,7 @@ while True:
         if event.type == pygame.KEYDOWN:
             key = event.key
             if key == pygame.K_RETURN and not inGame:
+                ticksPerSec = speed
                 inGame = True
                 hasPlayed = True
                 snake = Snake(gridSize / 2, gridSize / 2, initSnakeLen)
@@ -172,6 +181,23 @@ while True:
                 dt = 0
                 last = time.time() * 1000
                 score = 0
+            if key == pygame.K_ESCAPE:
+                if not inGame:
+                    hasPlayed = False
+            if key == pygame.K_LEFT:
+                if not inGame and not hasPlayed:
+                    if speed > 5:
+                        speed -= 5
+            if key == pygame.K_RIGHT:
+                if not inGame and not hasPlayed:
+                    speed += 5
+            if key == pygame.K_DOWN:
+                if not inGame and not hasPlayed:
+                    if speedInc > 0:
+                        speedInc -= 1
+            if key == pygame.K_UP:
+                if not inGame and not hasPlayed:
+                    speedInc += 1
             
     if key == pygame.K_LEFT or key == pygame.K_a:
         snake.changeDir(180)
